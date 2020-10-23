@@ -41,15 +41,15 @@ temps=1:60
 #Figure 1. 
 #A. TPC, specialist generalist, hotter is better
 
-breadth= c(0.05,0.1,0.1) 
-shift= c(-10,-10,-10)
+breadth= c(0.1,0.2,0.2) 
+shift= c(-10,-5,-7)
 arans=c(0,0,1)
 scen=c("","spec-gen","thermodynamics")
 
 vars= cbind(breadth, shift, arans)
 
 for(k in 1:3){ 
-  perf = TPC.beta(temps, shift=vars[k,2], breadth=vars[k,1], aran=vars[k,3])  
+  perf = TPC.beta(temps, shift=vars[k,2], breadth=vars[k,1], aran=vars[k,3], tolerance=50)  
   if(k==1) ps= perf
   if(k>1) ps= c(ps, perf)
 }
@@ -64,8 +64,6 @@ pdat$scen= rep(scen, each=60)
 
 #plot
 ggplot(pdat,aes(x=ts, y=ps, color=scen))+geom_line()
-
-
 
 #--------
 #B. Gilchrist 1995, envi var
@@ -95,7 +93,7 @@ tpcs$AG= as.factor(tpcs$AG)
 tpcs$WG= as.factor(tpcs$WG)
 
 #plot
-p<-ggplot(tpcs)+aes(x=temperature, y = performance)+geom_line(aes(color=WG, lty=AG)) 
+p<-ggplot(tpcs)+aes(x=temperature, y = performance)+geom_line(aes(color=WG, lty=AG)) +xlim(10,40)
 #p + geom_area(aes(fill=WG))
   
 #--------
@@ -168,4 +166,3 @@ for(z.count in 1:7){
 
 legend("topright", legend=c("noncumulative","hardening", "stress response"), lty=c("solid","dashed","dotted"), col=c("black","black","black") , bty="n")
 #legend("bottomright", legend=c("injury","mortality"), lty=c("solid"), col=c("black","grey") , bty="n")
-
