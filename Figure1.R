@@ -44,7 +44,7 @@ temps=1:60
 breadth= c(0.1,0.2,0.2) 
 shift= c(-10,-5,-7)
 arans=c(0,0,1)
-scen=c("","spec-gen","thermodynamics")
+scen=c("cool","warm: specialist-generalist","warm: thermodynamics")
 
 vars= cbind(breadth, shift, arans)
 
@@ -63,10 +63,19 @@ pdat= as.data.frame(pdat)
 pdat$scen= rep(scen, each=60)
 
 #plot
-ggplot(pdat,aes(x=ts, y=ps, color=scen))+geom_line()
+fig1a=ggplot(pdat,aes(x=ts, y=ps, color=scen))+geom_line(size=1.1)+
+  theme_bw(base_size=14)+xlab("")+ylab("")+
+  theme(legend.position = c(0.25, 0.9))+
+  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+ 
+  labs(color='') 
+
+fig1a= fig1a +geom_text(data=pdat, x=3, y=0.15, label="CTmin", show.legend=FALSE, color="black",size=5)+
+  geom_text(data=pdat, x=25, y=3, label="Topt", show.legend=FALSE, color="black",size=5)+
+  geom_text(data=pdat, x=35, y=0.15, label="CTmax", show.legend=FALSE, color="black",size=5)
 
 #--------
-#B. Gilchrist 1995, envi var
+#Gilchrist 1995, envi var
+#DON'T USE
 
 #Parameters from Table 1
 #AG and WG variation
@@ -97,10 +106,9 @@ p<-ggplot(tpcs)+aes(x=temperature, y = performance)+geom_line(aes(color=WG, lty=
 #p + geom_area(aes(fill=WG))
   
 #--------
-#C. Ashbury and Angilletta 2010, hotter is better
+#B. Ashbury and Angilletta 2010, hotter is better
 
 #parameters
-
 #just fecundity, fig 2
 #breadth= c(0.002, 0.00035, 0.00033, 0.0116, 0.00014, 0.00013, 0.0217, 0.02, 0.0008) 
 #shift= c(-20, -19, -16.5, -18.67, -18.0, -15.1, -17, -16.2, -14)
@@ -112,6 +120,9 @@ shift= c(-20,-19,-20,-18.5,-20,-21,-17,-19,-20)
 wv= c(0.5, 3.5, 6.5, 0.5, 3.5, 6.5, 0.5, 3.5, 6.5)
 av= c(0,0,0,10,10,10,20,20,20)
 vars= cbind(breadth, shift, wv, av)
+
+#drop wvs=0.5 for simplicity
+#vars=vars[vars[,3]>1,]
 
 for(k in 1:9){ 
  perf = TPC.beta(temps, shift=vars[k,2], breadth=vars[k,1], aran=1, tolerance= 80, skew=0.5)  
@@ -133,6 +144,11 @@ pdat$groups= paste(pdat$wvs,pdat$avs, sep="_")
 
 #plot
 ggplot(pdat,aes(x=ts, y=ps))+geom_line(aes(color=wvs, lty=avs))
+
+theme_bw(base_size=14)+xlab("")+ylab("")+
+  theme(legend.position = c(0.25, 0.9))+
+  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+ 
+  labs(color='') 
 
 #--------
 #D. Williams et al. Carry over

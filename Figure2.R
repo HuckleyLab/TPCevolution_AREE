@@ -1,6 +1,11 @@
 #AREE figures
 library(ggplot2)
 library(viridis)
+#library(patchwork)
+library(cowplot)
+library(gridExtra)
+library(grid)
+library('rphylopic')
 
 #FUNCTIONS
 #Deutsch et al. TPC
@@ -42,12 +47,23 @@ if(i==1) p1.all= p1
 if(i>1) p1.all=rbind(p1, p1.all)
 }
 
+#change population labels
+p1.all$population[p1.all$population=="Sacramento Valley, CA"]="CA"
+p1.all$population[p1.all$population=="Montrose Valley, CO"]="CO"
+
 #plot
 p1.all$year= as.factor(p1.all$year)
-fig2.butterfly= ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=population, lty=year),size=2)+
-  theme_bw(base_size=14)+xlab("temperature (°C)")+ylab("performance")
+img <- image_data("5aeaf558-3c48-4173-83b4-dbf2846f8d75", size = "512")[[1]]
+
+fig2.butterfly= ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=population, lty=year),size=1.1)+
+  theme_bw(base_size=14)+xlab("")+ylab("")+
+  theme(legend.position = c(0.25, 0.65))+
+  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+
+  add_phylopic(img)
 
 #------
+#DROPPED
+
 # Ant urban adaptation https://academic.oup.com/biolinnean/article/121/2/248/3038290
 #Evol App https://datadryad.org/stash/dataset/doi:10.5061/dryad.0r75421
 # https://datadryad.org/stash/dataset/doi:10.5061/dryad.0r75421
@@ -69,7 +85,7 @@ for(i in 1:nrow(dat)){
   topt= dat$ctmin+(dat$ctmax-dat$ctmin)*0.7
   p= tpc.plot(T=temps, Topt=topt[i], CTmin=dat$ctmin, CTmax=dat$ctmax)
   p1=as.data.frame(cbind(temps,p))
-  p1$taxa="butterfly"
+  p1$taxa="ants"
   p1$colonyID=dat$colonyID[i]
   p1$generation=dat$generation[i]
   p1$population= dat$population[i]
@@ -79,7 +95,9 @@ for(i in 1:nrow(dat)){
 }
 
 #plot
-ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=colonyID, lty=population))
+ggplot(p1.all,aes(x=temps, y=p, group=colonyID))+geom_line(aes(color=generation, lty=population))+
+  theme_bw(base_size=14)+xlab("temperature (°C)")+ylab("performance")+
+  theme(legend.position = "bottom")
 
 #------
 # Lizard TPCs https://onlinelibrary.wiley.com/doi/full/10.1111/1749-4877.12309c
@@ -104,16 +122,21 @@ for(i in 1:nrow(dat)){
   p= tpc(T=temps, Topt=dat$Topt[i],CTmin=dat$CTmin[i], CTmax=dat$CTmax[i], Pmax=dat$Pmax[i] )
   p1=as.data.frame(cbind(temps,p))
   p1$taxa="lizard"
-  p1$pop=dat$pop[i]
-  p1$gen= dat$gen[i]
+  p1$population=dat$pop[i]
+  p1$generation= dat$gen[i]
   
   if(i==1) p1.all= p1
   if(i>1) p1.all=rbind(p1, p1.all)
 }
 
 #plot
-ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=gen, lty=pop))+
-  theme_bw(base_size=14)+xlab("temperature (°C)")+ylab("performance")
+img <- image_data("a359e147-c088-4c18-a2f1-49abfb2b9325", size = "512")[[1]]
+
+fig2.lizards= ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=generation, lty=population), size=1.1)+
+  theme_bw(base_size=14)+xlab("")+ylab("")+
+  theme(legend.position = c(0.25, 0.65))+
+  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+
+  add_phylopic(img)
 
 #------
 #Plants
@@ -142,8 +165,13 @@ for(i in 1:nrow(dat)){
 
 #plot
 p1.all$year= as.factor(p1.all$year)
-fig2.mimulus=ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=population, lty=year))+
-  theme_bw(base_size=14)+xlab("temperature (°C)")+ylab("performance")
+img <- image_data("f1cfa22f-a198-41b2-b22a-1cdaec1c9e1c", size = "512")[[1]]
+
+fig2.mimulus=ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=population, lty=year), size=1.1)+
+  theme_bw(base_size=14)+xlab("")+ylab("")+
+  theme(legend.position = c(0.25, 0.65))+
+  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+
+  add_phylopic(img)
 
 #------
 #Microbe
@@ -174,9 +202,30 @@ for(i in 1:nrow(dat)){
 p1.all$environment=factor(p1.all$environment, levels=c("ancestor","22","26","32","FS"))
 cols= viridis(5)
 cols[1]<-"darkgray"
+img <- image_data("56d01eab-d085-4f8b-a1ab-262f3aaad052", size = "512")[[1]]
 
-fig2.diatom=ggplot(p1.all,aes(x=temps-273, y=p))+geom_line(aes(color=environment),size=2)+
-  theme_bw(base_size=14)+xlab("temperature (°C)")+ylab("performance")+
-  scale_colour_manual(values = cols)
+fig2.diatom=ggplot(p1.all,aes(x=temps-273, y=p))+geom_line(aes(color=environment),size=1.1)+
+  theme_bw(base_size=14)+xlab("")+ylab("")+
+  scale_colour_manual(values = cols)+
+  theme(legend.position = c(0.25, 0.75))+
+  theme(legend.background = element_rect(fill=NA))+
+  add_phylopic(img)
 
+#========================
+#combine
+setwd("/Volumes/GoogleDrive/Shared drives/TrEnCh/Projects/AREE_TPCevolution/figures/")
 
+pdf("Fig2.pdf", height = 8, width = 8)
+
+plot<-plot_grid(fig2.butterfly, fig2.lizards, fig2.mimulus, fig2.diatom, align='vh', ncol=2, vjust=1, scale = 1)
+
+#create common x and y labels
+y.grob <- textGrob("performance", 
+                   gp=gpar(fontsize=20), rot=90)
+x.grob <- textGrob("temperature (°C)", 
+                   gp=gpar(fontsize=20))
+
+#add to plot
+grid.arrange(arrangeGrob(plot, left = y.grob, bottom = x.grob))
+
+dev.off()
