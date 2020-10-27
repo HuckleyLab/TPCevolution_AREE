@@ -57,8 +57,8 @@ img <- image_data("5aeaf558-3c48-4173-83b4-dbf2846f8d75", size = "512")[[1]]
 
 fig2.butterfly= ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=population, lty=year),size=1.1)+
   theme_bw(base_size=14)+xlab("")+ylab("")+
-  theme(legend.position = c(0.25, 0.65))+
-  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+
+  theme(legend.position = c(0.25, 0.65),legend.background = element_rect(fill="transparent"))+
+  scale_color_viridis_d()+
   add_phylopic(img)
 
 #------
@@ -135,7 +135,7 @@ img <- image_data("a359e147-c088-4c18-a2f1-49abfb2b9325", size = "512")[[1]]
 fig2.lizards= ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=generation, lty=population), size=1.1)+
   theme_bw(base_size=14)+xlab("")+ylab("")+
   theme(legend.position = c(0.25, 0.65))+
-  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+
+  theme(legend.background = element_rect(fill="transparent"))+scale_color_viridis_d()+
   add_phylopic(img)
 
 #------
@@ -208,7 +208,7 @@ fig2.diatom=ggplot(p1.all,aes(x=temps-273, y=p))+geom_line(aes(color=environment
   theme_bw(base_size=14)+xlab("")+ylab("")+
   scale_colour_manual(values = cols)+
   theme(legend.position = c(0.25, 0.75))+
-  theme(legend.background = element_rect(fill=NA))+
+  theme(legend.background = element_rect(fill="transparent"))+
   add_phylopic(img)
 
 #========================
@@ -217,7 +217,7 @@ setwd("/Volumes/GoogleDrive/Shared drives/TrEnCh/Projects/AREE_TPCevolution/figu
 
 pdf("Fig2.pdf", height = 8, width = 8)
 
-plot<-plot_grid(fig2.butterfly, fig2.lizards, fig2.mimulus, fig2.diatom, align='vh', ncol=2, vjust=1, scale = 1)
+plot<-plot_grid(fig2.butterfly, fig2.lizards, fig2.mimulus, fig2.diatom, align='vh', ncol=2, vjust=1, scale = 1,labels=c("a","b","c","d"))
 
 #create common x and y labels
 y.grob <- textGrob("performance", 

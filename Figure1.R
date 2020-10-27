@@ -1,5 +1,8 @@
 #AREE figures
 library(ggplot2)
+library(cowplot)
+library(gridExtra)
+library(grid)
 
 #FUNCTIONS
 #Deutsch et al. TPC
@@ -65,11 +68,11 @@ pdat$scen= rep(scen, each=60)
 #plot
 fig1a=ggplot(pdat,aes(x=ts, y=ps, color=scen))+geom_line(size=1.1)+
   theme_bw(base_size=14)+xlab("")+ylab("")+
-  theme(legend.position = c(0.25, 0.9))+
+  theme(legend.position = c(0.4, 0.9))+
   theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+ 
   labs(color='') 
 
-fig1a= fig1a +geom_text(data=pdat, x=3, y=0.15, label="CTmin", show.legend=FALSE, color="black",size=5)+
+fig1a= fig1a +geom_text(data=pdat, x=5, y=0.15, label="CTmin", show.legend=FALSE, color="black",size=5)+
   geom_text(data=pdat, x=25, y=3, label="Topt", show.legend=FALSE, color="black",size=5)+
   geom_text(data=pdat, x=35, y=0.15, label="CTmax", show.legend=FALSE, color="black",size=5)
 
@@ -120,18 +123,20 @@ shift= c(-20,-19,-20,-18.5,-20,-21,-17,-19,-20)
 wv= c(0.5, 3.5, 6.5, 0.5, 3.5, 6.5, 0.5, 3.5, 6.5)
 av= c(0,0,0,10,10,10,20,20,20)
 vars= cbind(breadth, shift, wv, av)
+#drop wv 0.5
+inds=which(wv>0.5)
+wv=wv[inds]
+av=av[inds]
+vars=vars[inds,]
 
-#drop wvs=0.5 for simplicity
-#vars=vars[vars[,3]>1,]
-
-for(k in 1:9){ 
+for(k in 1:nrow(vars)){ 
  perf = TPC.beta(temps, shift=vars[k,2], breadth=vars[k,1], aran=1, tolerance= 80, skew=0.5)  
   if(k==1) ps= perf
   if(k>1) ps= c(ps, perf)
  }
 
 #other vars
-ts= rep(temps,9)
+ts= rep(temps,nrow(vars))
 wvs= rep(wv, each=60)
 avs= rep(av, each=60)
 ps[is.nan(ps)]=0
@@ -143,42 +148,62 @@ pdat$avs= factor(pdat$avs)
 pdat$groups= paste(pdat$wvs,pdat$avs, sep="_")
 
 #plot
-ggplot(pdat,aes(x=ts, y=ps))+geom_line(aes(color=wvs, lty=avs))
-
+fig1b= ggplot(pdat,aes(x=ts, y=ps))+geom_line(aes(color=wvs, lty=avs),size=1.1)+
 theme_bw(base_size=14)+xlab("")+ylab("")+
-  theme(legend.position = c(0.25, 0.9))+
-  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()+ 
-  labs(color='') 
+  theme(legend.position = c(0.75, 0.75), legend.background = element_rect(fill="transparent"))+
+  scale_color_viridis_d()+ 
+  labs(color='within generation',lty='among generations')
 
 #--------
-#D. Williams et al. Carry over
+#C. Williams et al. Carry over
 
 #parameters from CarryoverICB
 shifts= c(-8.416198, -9.609429, -7.507768, -12.56133, -0.8443629, -14.53758, -13.06035)
 breadths= c(0.08008858, 0.06062592, 0.09135031, 0.1375593, 0.1351597, 0.15, 0.05)
   
-#---
-ltys= c("solid","dashed","dotted","solid","dashed","dotted", "solid")
-cols= c("black","black","black","darkgrey","darkgrey","darkgrey", "grey")
-lwds= c(3,3,3,3,3,3,5)
+#carryover= c("no carryover","beneficial acclimation", "cumulative damage","no carryover","beneficial acclimation", "cumulative damage","no carryover")
+carryover= c("no carryover","acclimation", "damage","no carryover","acclimation", "damage","no carryover")
+component=c("injury","injury","injury","mortality","mortality","mortality","performance")
+dat= data.frame(shifts, breadths, carryover, component)
 
-d <- density(clim.dat$V2)  
-plot(d, xlim=range(5,45), main="", ylab="Performance", xlab="Temperature (?C)", col="gray", lty="solid",yaxt="n", cex.lab=1.2)
-polygon(d, col="lightgray", border="lightgray")
+for(i in 1:nrow(vars) ){ 
+  
+  p= TPC.beta(temps, shift=dat[i,"shifts"], breadth=dat[i,"breadths"])
+  p1=as.data.frame(cbind(temps,p))
+  p1$carryover=dat$carryover[i]
+  p1$component=dat$component[i]
+  
+  if(i==1) p1.all= p1
+  if(i>1) p1.all=rbind(p1, p1.all)
+}
+  
+#plot
+p1.all$carryover=factor(p1.all$carryover, levels=c("no carryover","acclimation","damage"))
+p1.all$component=factor(p1.all$component, levels=c("performance","injury","mortality"))
 
-for(z.count in 1:7){ 
-  
-  z1= TPC.beta(T, shift=shifts[z.count], breadth=breadths[z.count]) 
-  par(new=TRUE)
-  if(z.count==1){
-    zscale= TPC.beta(temps, shift=shifts[z.count], breadth=min(breadths, na.rm=TRUE))
-    plot(temps,z1, type="l", ylim=range(0,max(zscale)), xlim=range(5,45),  ylab="", xlab="", lty=ltys[z.count], lwd=lwds[z.count], col=cols[z.count], axes=FALSE)
-  }
-  if(z.count>1) points(temps,z1, type="l",lty=ltys[z.count], lwd=lwds[z.count], col=cols[z.count])
-  
-  #axis(side=4)
-  
-} #end loop plots
+fig1c= ggplot()+
+  geom_density(data=clim.dat, aes(x=V2,y=..scaled..),color="grey", fill="grey")+
+  geom_line(data=p1.all, aes(x=temps, y=p, color=component, lty=carryover),size=1.1)+
+  theme_bw(base_size=14)+xlab("")+ylab("")+
+  theme(legend.position = c(0.8, 0.75),legend.background = element_rect(fill="transparent"))+
+  theme(legend.background = element_rect(fill=NA))+scale_color_viridis_d()
 
-legend("topright", legend=c("noncumulative","hardening", "stress response"), lty=c("solid","dashed","dotted"), col=c("black","black","black") , bty="n")
-#legend("bottomright", legend=c("injury","mortality"), lty=c("solid"), col=c("black","grey") , bty="n")
+#========================
+#combine
+setwd("/Volumes/GoogleDrive/Shared drives/TrEnCh/Projects/AREE_TPCevolution/figures/")
+
+pdf("Fig1.pdf", height = 6, width = 12)
+
+plot<-plot_grid(fig1a, fig1b, fig1c, align='vh', ncol=3, vjust=1, scale = 1,labels=c("a","b","c"))
+
+#create common x and y labels
+y.grob <- textGrob("performance", 
+                   gp=gpar(fontsize=20), rot=90)
+x.grob <- textGrob("temperature (°C)", 
+                   gp=gpar(fontsize=20))
+
+#add to plot
+grid.arrange(arrangeGrob(plot, left = y.grob, bottom = x.grob))
+
+dev.off()
+
