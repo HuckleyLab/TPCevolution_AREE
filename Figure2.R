@@ -30,7 +30,7 @@ temps=0:50
 #Higgins
 tpc= function(T, Fmax,To, row, sigma) Fmax*exp(-exp(row*(T-To)-6)-sigma*(T-To)^2)
 
-setwd("/Volumes/GoogleDrive/Shared drives/TrEnCh/Projects/AREE_TPCevolution/data/")
+setwd("./data/")
 dat= read.csv("HigginsTPC.csv")
 #keep comparison
 dat= dat[c(1,3,5,6),]
@@ -68,8 +68,6 @@ fig2.butterfly= ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=population,
 #Evol App https://datadryad.org/stash/dataset/doi:10.5061/dryad.0r75421
 # https://datadryad.org/stash/dataset/doi:10.5061/dryad.0r75421
 # data in dryad
-
-setwd("/Volumes/GoogleDrive/Shared drives/TrEnCh/Projects/AREE_TPCevolution/data/ants/")
 
 ctmin= read.csv("Field_versus_F2_CTmin.csv")
 ctmax= read.csv("Field_versus_F2_CTmax.csv")
@@ -115,7 +113,6 @@ tpc= function(T,Topt,CTmin, CTmax, Pmax){
   return(F)
 }
 
-setwd("/Volumes/GoogleDrive/Shared drives/TrEnCh/Projects/AREE_TPCevolution/data/")
 dat= read.csv("lizardTPC.csv")
 
 for(i in 1:nrow(dat)){
@@ -145,7 +142,7 @@ fig2.lizards= ggplot(p1.all,aes(x=temps, y=p))+geom_line(aes(color=generation, l
 #Mimulus temp resurrection: https://onlinelibrary.wiley.com/doi/10.1111/evo.14041
 #https://github.com/rwoolive/Cardinalis_TPC_evolution
 
-dat= read.csv("MimulusTPc.csv")
+dat= read.csv("MimulusTPC.csv")
 #pick one population from each
 dat= dat[dat$Pop %in% c("C1","N1","S1"),]
 dat$Pop[dat$Pop=="C1"]<-"central"
