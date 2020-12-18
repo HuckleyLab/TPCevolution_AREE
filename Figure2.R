@@ -94,7 +94,7 @@ for(i in 1:nrow(dat)){
 
 #plot
 ggplot(p1.all,aes(x=temps, y=p, group=colonyID))+geom_line(aes(color=generation, lty=population))+
-  theme_bw(base_size=14)+xlab("temperature (°C)")+ylab("performance")+
+  theme_bw(base_size=14)+xlab("body temperature (°C)")+ylab("performance")+
   theme(legend.position = "bottom")
 
 #------
@@ -219,7 +219,7 @@ plot<-plot_grid(fig2.butterfly, fig2.lizards, fig2.mimulus, fig2.diatom, align='
 #create common x and y labels
 y.grob <- textGrob("performance", 
                    gp=gpar(fontsize=20), rot=90)
-x.grob <- textGrob("temperature (°C)", 
+x.grob <- textGrob("body temperature (°C)", 
                    gp=gpar(fontsize=20))
 
 #add to plot

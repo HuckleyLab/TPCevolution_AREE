@@ -199,7 +199,7 @@ plot<-plot_grid(fig1a, fig1b, fig1c, align='vh', ncol=3, vjust=1, scale = 1,labe
 #create common x and y labels
 y.grob <- textGrob("performance", 
                    gp=gpar(fontsize=20), rot=90)
-x.grob <- textGrob("temperature (°C)", 
+x.grob <- textGrob("body temperature (°C)", 
                    gp=gpar(fontsize=20))
 
 #add to plot
