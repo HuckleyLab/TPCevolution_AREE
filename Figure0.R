@@ -110,7 +110,8 @@ fig.t<- ggplot(data=te.max.yr, aes(x=doy, y = MaxTemp_C, color=zone2, group=subs
   geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=39.4, slope=0), col="darkorange")+ #high, fast
   geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=36.6, slope=0), col="darkorange", lty="dotted")+ #high slow
   geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=39.4-1.07, slope=0), col="darkorange", lty="dashed")+ #high, fast, acclimated
-  theme(legend.position="bottom") #c(0.8,0.95)
+  theme(legend.position="bottom")+
+  ggtitle('b')
   #guides(fill=guide_legend(title.position = "left"))
 #tidal.height..m.
  # , lty=subsite
@@ -134,7 +135,8 @@ fig.quilt<- ggplot(te.month) +
   #scale_fill_distiller(palette="Spectral", na.value="white", name="max temperature (°C)") + 
   theme_classic()+xlab("month")+ylab("latitude (°)")+ theme(legend.position="bottom")+ #+ coord_fixed(ratio = 4)
   geom_hline(yintercept = 7.5, color="white", lwd=2) +
-  scale_x_continuous(breaks=seq(1,12,2))
+  scale_x_continuous(breaks=seq(1,12,2))+
+  ggtitle('c')
 
 #==================================================
 #annual means
@@ -170,9 +172,10 @@ library(ggpubr)
 library(magick)
 ir <- image_read('VisIR_SandsIntertidal.JPG')
 ir <- ggplot() +
-  background_image(ir) + coord_fixed()
+  background_image(ir) + #coord_fixed()+
+  ggtitle('a')
 
 
 pdf("Fig0.pdf", height = 10, width = 8)
- (ir | fig.quilt)/fig.t + plot_annotation(tag_levels = 'a')
+ (ir | fig.quilt)/fig.t 
 dev.off()
