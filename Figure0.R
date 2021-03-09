@@ -63,12 +63,9 @@ te.max2= subset(te.max, te.max$site %in% c("BB","LL") ) # "HS","SD","AG"
 # USWACC	48.5494	-123.0059667	Colins Cove
 # USWACP	48.45135	-122.9617833	Cattle Point
 #* USWASD	48.39136667	-124.7383667	Strawberry Point
-
 #* USORBB	44.83064	-124.06005	Boiler Bay
-
 #* USCAPD	35.66581667	-121.2867167	Piedras
 # USCAAG	34.46716667	-120.2770333	Alegria
-
 
 #time series
 te.max1= te.max2
@@ -85,16 +82,13 @@ te.max1= subset(te.max1, te.max1$doy>120 & te.max1$doy<274)
 
 #update labels
 te.max1$labs= as.character(te.max1$site)
-te.max1$labs[which(te.max1$labs=="BB")]<- "44.8° Boiler Bay, OR"
-te.max1$labs[which(te.max1$labs=="PD")]<- "35.7° Piedras Blancas, CA"
-te.max1$labs[which(te.max1$labs=="SD")]<- "48.4° Strawberry Point, WA"
-te.max1$labs[which(te.max1$labs=="LL")]<- "34.7° Lompoc, CA"
-te.max1$labs[which(te.max1$labs=="AG")]<- "37.3° Alegria, CA"
+te.max1$labs[which(te.max1$labs=="BB")]<- "Boiler Bay, OR, 44.8°N"
+te.max1$labs[which(te.max1$labs=="LL")]<- "Lompoc, CA, 34.7°N"
 
 #restrict zones
 te.max1$zone2= factor(te.max1$zone, levels=c("Low","Mid","High") )
 #order sites
-te.max1$labs= factor(te.max1$labs, levels=c("44.8° Boiler Bay, OR", "34.7° Lompoc, CA")  )
+te.max1$labs= factor(te.max1$labs, levels=c("Boiler Bay, OR, 44.8°N", "Lompoc, CA, 34.7°N", ordered="TRUE")  )
   
 te.max1= subset(te.max1, !is.na(te.max1$zone2==2002))
 
@@ -102,21 +96,27 @@ te.max.yr= subset(te.max1, te.max1$year==2008)
 
 #FIG 1A
 #by lat
+sens.h <- data.frame(doy = 230,MaxTemp_C = 41,subsite=10, zone2="Mid",labs = "Boiler Bay, OR, 44.8°N")
+sens.l <- data.frame(doy = 238,MaxTemp_C = 35,subsite=10, zone2="Mid",labs = "Boiler Bay, OR, 44.8°N")
+
 fig.t<- ggplot(data=te.max.yr, aes(x=doy, y = MaxTemp_C, color=zone2, group=subsite))+geom_line(alpha=0.8) +
-  theme_classic() +facet_wrap(~labs, ncol=1)+ 
+  theme_classic() +
   labs(x = "Day of year",y="Maximum daily temperature (°C)")+
   scale_color_manual(values=c("purple","darkgreen","darkorange"), name="intidal height")+
-  geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=36.2, slope=0), col="purple")+ #low, fast
-  geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=39.4, slope=0), col="darkorange")+ #high, fast
-  geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=36.6, slope=0), col="darkorange", lty="dotted")+ #high slow
-  geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=39.4-1.07, slope=0), col="darkorange", lty="dashed")+ #high, fast, acclimated
+  geom_abline(aes(intercept=36.2, slope=0), col="purple")+ #low, fast
+  geom_abline(aes(intercept=39.4, slope=0), col="darkorange")+ #high, fast
+  geom_abline(aes(intercept=36.6, slope=0), col="darkorange", lty="dotted")+ #high slow
+  geom_abline(aes(intercept=39.4-1.07, slope=0), col="darkorange", lty="dashed")+ #high, fast, acclimated
   theme(legend.position="bottom")+
-  ggtitle('b')
-  #guides(fill=guide_legend(title.position = "left"))
-#tidal.height..m.
- # , lty=subsite
+  ggtitle('b')+
+  geom_text(data = sens.h,label = "sensitivity: Tcrit high intertidal", color="darkorange")+
+  geom_text(data = sens.l,label = "Tcrit low intertidal", color="purple")+
+  facet_wrap(~labs, ncol=1)
+#solid: fast heating, dashed: fast heating with acclimation, dotted: slow heating
 
-
+#Just sensitivity for lompoc
+#geom_abline(data = subset(te.max.yr, labs == "34.7° Lompoc, CA"), aes(intercept=39.4-1.07, slope=0), col="darkorange", lty="dashed")+ #high, fast, acclimated
+  
 #===================================================
 #Quilt plot
 
@@ -131,7 +131,7 @@ fig.quilt<- ggplot(te.month) +
   aes(x = month, y = as.factor(lat.lab) ) + 
   geom_tile(aes(fill = mean.max)) + 
   coord_equal()+
-  scale_fill_gradientn(colours = rev(heat.colors(10)), name="temperature (°C)" )+
+  scale_fill_gradientn(colours = viridis(10), name="temperature (°C)" )+
   #scale_fill_distiller(palette="Spectral", na.value="white", name="max temperature (°C)") + 
   theme_classic()+xlab("month")+ylab("latitude (°)")+ theme(legend.position="bottom")+ #+ coord_fixed(ratio = 4)
   geom_hline(yintercept = 7.5, color="white", lwd=2) +
